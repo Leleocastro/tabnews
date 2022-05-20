@@ -1,6 +1,9 @@
+import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-//
+import 'package:string_validator/string_validator.dart' as validator;
+
+import 'login_controller.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -10,14 +13,11 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
+  final controller = Get.find<LoginController>();
 
   @override
   void dispose() {
-    _emailController.dispose();
-    _passwordController.dispose();
+    controller.dispose();
     super.dispose();
   }
 
@@ -37,15 +37,18 @@ class _LoginPageState extends State<LoginPage> {
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           child: Form(
-            key: _formKey,
+            key: controller.formKey,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
               children: [
-                SizedBox(
-                  height: h / 4,
-                  width: w / 1.5,
-                  child: SvgPicture.asset(
-                    'assets/images/favicon.svg',
+                Hero(
+                  tag: 'logo',
+                  child: SizedBox(
+                    height: h / 4,
+                    width: w / 1.5,
+                    child: SvgPicture.asset(
+                      'assets/images/favicon.svg',
+                    ),
                   ),
                 ),
                 const SizedBox(
@@ -62,8 +65,16 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(
                   height: 50,
                 ),
-                TextField(
-                  controller: _emailController,
+                TextFormField(
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Necessário informar email!';
+                    } else if (!validator.isEmail(value)) {
+                      return 'Email inválido!';
+                    }
+                    return null;
+                  },
+                  controller: controller.emailController,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     hintText: 'Email',
@@ -73,9 +84,14 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(
                   height: 15,
                 ),
-                TextField(
+                TextFormField(
+                  validator: (value) {
+                    if (value!.isEmpty) {
+                      return 'Senha necessária!';
+                    }
+                  },
                   obscureText: true,
-                  controller: _passwordController,
+                  controller: controller.passwordController,
                   decoration: const InputDecoration(
                     border: OutlineInputBorder(),
                     hintText: 'Senha',
@@ -87,7 +103,7 @@ class _LoginPageState extends State<LoginPage> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
-                    GestureDetector(
+                    InkWell(
                       onTap: () {},
                       child: const Text(
                         "Esqueceu sua senha?",
@@ -103,16 +119,37 @@ class _LoginPageState extends State<LoginPage> {
                 const SizedBox(
                   height: 30,
                 ),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      minimumSize: Size(w / 1.1, h / 15)),
-                  onPressed: () {},
-                  child: const Text("Login"),
+                Obx(
+                  () => Visibility(
+                    visible: controller.errorMessage.value.isNotEmpty,
+                    child: Padding(
+                      padding: const EdgeInsets.all(10),
+                      child: Text(
+                        controller.errorMessage.value,
+                        style: const TextStyle(
+                          color: Colors.red,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                Obx(
+                  () => ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                        minimumSize: Size(w / 1.1, h / 15)),
+                    onPressed:
+                        controller.isLoading.value ? null : controller.login,
+                    child: controller.isLoading.value
+                        ? const Center(
+                            child: CircularProgressIndicator(),
+                          )
+                        : const Text("Login"),
+                  ),
                 ),
                 const SizedBox(
                   height: 20,
                 ),
-                GestureDetector(
+                InkWell(
                   onTap: () {
                     Navigator.pushNamed(context, '/signup');
                   },

@@ -1,4 +1,6 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tabnews/src/routes/app_pages.dart';
@@ -9,6 +11,8 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final baseUrl = dotenv.env['BASE_URL'];
+
     return GetMaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'TabNews',
@@ -28,6 +32,14 @@ class MyApp extends StatelessWidget {
           brightness: Brightness.light,
         ),
       ),
+      initialBinding: BindingsBuilder(() {
+        Get.lazyPut<Dio>(
+          () => Dio(
+            BaseOptions(baseUrl: baseUrl ?? ''),
+          ),
+          fenix: true,
+        );
+      }),
       initialRoute: Routes.home,
       getPages: AppPages.routes,
     );
