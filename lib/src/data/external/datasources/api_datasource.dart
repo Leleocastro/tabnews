@@ -33,4 +33,30 @@ class ApiDatasource implements LoginDatasource {
       throw ErrorSignupEmail(message: e.toString());
     }
   }
+
+  @override
+  Future<UserModel> login({
+    required String email,
+    required String password,
+  }) async {
+    final dio = Get.find<Dio>();
+
+    try {
+      final response = await dio.post(
+        '/sessions',
+        data: {
+          'email': email,
+          'password': password,
+        },
+      );
+
+      return UserModel.fromMap(response.data);
+    } on DioError catch (e) {
+      throw ErrorSignupEmail(
+          message:
+              e.response?.data['message'].toString() ?? e.error.toString());
+    } catch (e) {
+      throw ErrorSignupEmail(message: e.toString());
+    }
+  }
 }

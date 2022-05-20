@@ -3,11 +3,13 @@ import 'dart:convert';
 class UserModel {
   final String id;
   final String username;
+  final String token;
   final List<String> features;
 
   const UserModel({
     required this.id,
     required this.username,
+    required this.token,
     required this.features,
   });
 
@@ -23,7 +25,8 @@ class UserModel {
     return UserModel(
       id: map['id'] ?? '',
       username: map['username'] ?? '',
-      features: List<String>.from(map['features']),
+      token: map['token'] ?? '',
+      features: List<String>.from(map['features'] ?? []),
     );
   }
 

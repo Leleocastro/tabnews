@@ -6,4 +6,8 @@ abstract class LoginDatasource {
     required String password,
     required String username,
   });
+  Future<UserModel> login({
+    required String email,
+    required String password,
+  });
 }
